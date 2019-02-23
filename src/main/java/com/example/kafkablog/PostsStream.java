@@ -38,6 +38,9 @@ public class PostsStream {
         final GlobalKTable<String, Post> postsTable = builder.globalTable("posts",
                 Consumed.with(Serdes.String(), postSerde), Materialized.as("queryablePosts"));
 
+        final GlobalKTable<String, Post> excitingPostsTable = builder.globalTable("EXCITING_POSTS",
+                Consumed.with(Serdes.String(), postSerde), Materialized.as("queryableExcitingPosts"));
+
         Properties streamProps = new Properties();
         streamProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "posts-listener");
         streamProps.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -56,6 +59,17 @@ public class PostsStream {
 
     public List<Post> findAll() {
         ReadOnlyKeyValueStore<String, Post> view = this.streams.store("queryablePosts", QueryableStoreTypes.keyValueStore());
+        List<Post> posts = new ArrayList<>();
+        KeyValueIterator<String, Post> iterator = view.all();
+        while (iterator.hasNext()) {
+            KeyValue<String, Post> next = iterator.next();
+            posts.add(next.value);
+        }
+        return posts;
+    }
+
+    public List<Post> findAllExciting() {
+        ReadOnlyKeyValueStore<String, Post> view = this.streams.store("queryableExcitingPosts", QueryableStoreTypes.keyValueStore());
         List<Post> posts = new ArrayList<>();
         KeyValueIterator<String, Post> iterator = view.all();
         while (iterator.hasNext()) {

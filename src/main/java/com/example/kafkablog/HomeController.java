@@ -10,11 +10,22 @@ import java.util.UUID;
 @Controller
 public class HomeController {
     @GetMapping({"/"})
-    public String hello(Model model, @RequestParam(value="name", required=false, defaultValue="World") String name) {
+    public String home(Model model, @RequestParam(value="name", required=false, defaultValue="World") String name) {
         model.addAttribute("name", name);
         model.addAttribute("post", new Post());
 
-        List<Post> posts = PostsListener.findAll();
+        List<Post> posts = PostsStream.getInstance().findAll();
+        model.addAttribute("posts", posts);
+
+        return "home";
+    }
+
+    @GetMapping({"/exciting"})
+    public String exciting(Model model, @RequestParam(value="name", required=false, defaultValue="World") String name) {
+        model.addAttribute("name", name);
+        model.addAttribute("post", new Post());
+
+        List<Post> posts = PostsStream.getInstance().findAllExciting();
         model.addAttribute("posts", posts);
 
         return "home";
