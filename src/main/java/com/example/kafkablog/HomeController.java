@@ -1,12 +1,9 @@
 package com.example.kafkablog;
 
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.state.KeyValueIterator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,12 +20,26 @@ public class HomeController {
         return "home";
     }
 
-    @PostMapping({"/posts/new"})
-    public String newPost(Model model, PostsProducer p, @ModelAttribute Post post) {
+    @GetMapping({"/posts/{id}/edit"})
+    public String edit(Model model, @PathVariable String id) {
+        Post post = PostsStream.getInstance().find(id);
         model.addAttribute("name", post.getTitle());
-        UUID uuid = UUID.randomUUID();
-        post.setId(uuid.toString());
-        p.produce(post);
+        model.addAttribute("post", post);
+
+        List<Post> posts = PostsStream.getInstance().findAll();
+        model.addAttribute("posts", posts);
+
         return "home";
+    }
+
+    @PostMapping({"/posts/save"})
+    public String save(@ModelAttribute Post post) {
+        if (post.getId().isEmpty()) {
+            UUID uuid = UUID.randomUUID();
+            post.setId(uuid.toString());
+        }
+        PostsStream.getInstance().produce(post);
+
+        return "redirect:/";
     }
 }

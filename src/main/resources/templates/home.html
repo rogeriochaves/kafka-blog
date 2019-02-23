@@ -7,15 +7,16 @@
 </head>
 <body>
 <h2 class="hello-title" th:text="'Hello, ' + ${name} + '!'"></h2>
-<form method="POST" th:action="@{/posts/new}" th:object="${post}">
+<form method="POST" th:action="@{/posts/save}" th:object="${post}">
+    <input type="hidden" th:field="*{id}" />
     Title: <input type="text" th:field="*{title}" />
     <input type="submit" value="Submit" />
 </form>
 <hr />
 <div th:each="p : ${posts}">
-   <td>
-   <p><span th:text="${p.getTitle()}"></span></p>
-   </td>
+   <li>
+   <p><a th:href="@{|/posts/${p.getId()}/edit|}"><span th:text="${p.getTitle()}"></span></a></p>
+   </li>
 </div>
 <script src="/js/main.js"></script>
 </body>
